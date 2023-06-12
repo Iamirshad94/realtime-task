@@ -25,38 +25,23 @@ class EmployeeRepository {
       version: 1,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE employees(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, profession TEXT, dateTime TEXT)',
+          'CREATE TABLE employees(id INTEGER PRIMARY KEY, name TEXT, profession TEXT, dateTime TEXT)',
         );
       },
     );
   }
 
-  Future<void> addEmployee(Employee employee) async {
-    debugPrint('id id - ${employee.id}');
-    debugPrint('name -- ${employee.name}');
-    debugPrint('profession ${employee.profession}');
-    debugPrint('date time --- ${employee.dateTime}');
-    await _database.insert(
-      'employees',
-      {
-        // 'id':employee.id,
-        'name': employee.name,
-        'profession': employee.profession,
-        'dateTime': employee.dateTime,
-      },
-    );
+  Future<int> addEmployee(Employee employee) async {
+    final Map<String, dynamic> employeeMap = employee.toMap();
+    final id = await _database.insert('employees', employeeMap);
+    return id;
   }
-
-    Future<void> clearData() async {
-      await _database.delete('employees');
-    }
-
 
   Future<List<Employee>> getEmployees() async {
     final List<Map<String, dynamic>> employeeMaps = await _database.query('employees');
     return employeeMaps.map((employeeMap) {
       return Employee(
-        // id: employeeMap['id'],
+        id: employeeMap['id'],
         name: employeeMap['name'],
         profession: employeeMap['profession'],
         dateTime: employeeMap['dateTime'],
@@ -65,23 +50,24 @@ class EmployeeRepository {
   }
 
   Future<void> updateEmployee(Employee employee) async {
+    final Map<String, dynamic> employeeMap = employee.toMap();
     await _database.update(
       'employees',
-      {
-        'name': employee.name,
-        'profession': employee.profession,
-        'dateTime': employee.dateTime,
-      },
+      employeeMap,
       where: 'id = ?',
       whereArgs: [employee.id],
     );
   }
 
-  Future<void> deleteEmployee(int id) async {
+  Future<void> deleteEmployee(int employeeId) async {
     await _database.delete(
       'employees',
       where: 'id = ?',
-      whereArgs: [id],
+      whereArgs: [employeeId],
     );
+  }
+
+  Future<void> closeDatabase() async {
+    await _database.close();
   }
 }

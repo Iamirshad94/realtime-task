@@ -4,53 +4,39 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:realtime_task/bloc/employee_bloc.dart';
 import 'package:realtime_task/bloc/employee_bloc_event.dart';
 import 'package:realtime_task/models/employee_model.dart';
-import 'package:realtime_task/repository/database.dart';
 import 'package:realtime_task/utility/constants.dart';
 import 'package:realtime_task/utility/custom_appbar.dart';
 import 'package:realtime_task/utility/route_constants.dart';
 import '../bloc/employee_bloc_state.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  bool _isLoading = true;
-  late EmployeeBloc _employeeBloc ;
+  final bool _isLoading = true;
+  late EmployeeBloc _employeeBloc;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _employeeBloc=BlocProvider.of<EmployeeBloc>(context);
-    loadData();
-  }
-
-
-  Future<void> loadData() async {
-    await Future.delayed(const Duration(seconds: 2));
+    _employeeBloc = BlocProvider.of<EmployeeBloc>(context);
     _employeeBloc.add(LoadEmployees());
   }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     return SafeArea(
         child: Scaffold(
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: 'Employee List',
-        actions: [
-          IconButton(
-              onPressed: () {
-                setState(() {
-                  EmployeeRepository().clearData();
-                });
-              },
-              icon: const Icon(Icons.clear))
-        ],
       ),
-      body:
-      BlocBuilder<EmployeeBloc, EmployeeState>(
+      body: BlocBuilder<EmployeeBloc, EmployeeState>(
         builder: (context, state) {
           if (state is LoadingEmployeeState && _isLoading) {
             return const Center(
@@ -58,21 +44,26 @@ class _HomePageState extends State<HomePage> {
             );
           } else if (state is LoadedEmployeeState) {
             final employees = state.employee;
-            return EmployeeList(
-              employeeList: employees,
-            );
+            if (employees.isEmpty) {
+              return const EmptyState();
+            } else {
+              return EmployeeList(
+                employeeList: employees,
+              );
+            }
           } else {
             return const SizedBox();
           }
         },
-      ),      bottomSheet: Container(
+      ),
+      bottomSheet: Container(
           height: screenSize.height * 0.04,
           color: Colors.white70,
           child: Padding(
             padding: const EdgeInsets.all(2.0),
             child: Center(
                 child: Text(
-              'Swipe left or right to delete an item',
+              AppConstants.swipeLeft,
               style: Theme.of(context).textTheme.titleSmall,
             )),
           )),
@@ -88,12 +79,10 @@ class _HomePageState extends State<HomePage> {
     ));
   }
 
-
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    BlocProvider.of<EmployeeBloc>(context).close();
   }
 }
 
@@ -109,17 +98,20 @@ class EmptyState extends StatelessWidget {
 class EmployeeList extends StatefulWidget {
   List<Employee>? employeeList;
 
-  EmployeeList({this.employeeList});
+  EmployeeList({super.key, this.employeeList});
 
   @override
   State<EmployeeList> createState() => _EmployeeListState();
 }
 
 class _EmployeeListState extends State<EmployeeList> {
-  void _removeItem(int employeeGroupIndex, int employeeIndex) {
-    setState(() {
-      // employeeGroups[employeeGroupIndex].employees.removeAt(employeeIndex);
-    });
+  late EmployeeBloc _employeeBloc;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _employeeBloc = BlocProvider.of(context);
   }
 
   @override
@@ -129,15 +121,17 @@ class _EmployeeListState extends State<EmployeeList> {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: widget.employeeList?.length,
       itemBuilder: (context, childIndex) {
+        var employee = widget.employeeList?[childIndex];
         return Dismissible(
           key: UniqueKey(),
           onDismissed: (direction) {
-            setState(() {
-             widget.employeeList?.removeAt(childIndex);
-            });
+            _employeeBloc.add(DeleteEmployee(employee.id!));
+            widget.employeeList?.removeAt(childIndex);
+            _employeeBloc.add(DeleteEmployee(employee.id!));
+
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Employee data has been deleted!'),
+                content: Text(AppConstants.dataDeleteMsg),
                 duration: Duration(seconds: 2),
               ),
             );
@@ -153,60 +147,48 @@ class _EmployeeListState extends State<EmployeeList> {
           ),
           child: GestureDetector(
             onTap: () {
-              Navigator.pushNamed(context, RouteConstants.editEmployeeRoute);
+              Navigator.pushNamed(context, RouteConstants.editEmployeeRoute,
+                  arguments: Employee(
+                      id: employee.id,
+                      name: employee.name,
+                      profession: employee.profession,
+                      dateTime: employee.dateTime));
             },
             child: SizedBox(
               width: double.infinity,
               child: Card(
                   child: Padding(
-                    padding:
+                padding:
                     const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.employeeList?[childIndex].name ?? '',
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        Text(
-                          widget.employeeList?[childIndex].profession ?? '',
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        Text(
-                          widget.employeeList?[childIndex].dateTime ?? '',
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                      ],
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      employee!.name,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                  )),
+                    const SizedBox(
+                      height: 4,
+                    ),
+                    Text(
+                      employee.profession,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(
+                      height: 4,
+                    ),
+                    Text(
+                      widget.employeeList?[childIndex].dateTime ?? '',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
+                ),
+              )),
             ),
           ),
         );
       },
     );
-
-    //   ListView.builder(
-    //   itemCount: employeeGroups.length,
-    //   itemBuilder: (context, index) {
-    //     final employeeGroup = employeeGroups[index];
-    //     return Column(
-    //       crossAxisAlignment: CrossAxisAlignment.start,
-    //       children: [
-    //         Container(
-    //           color: Colors.grey.withOpacity(0.1),
-    //           width: double.infinity,
-    //           child: Padding(
-    //             padding:
-    //                 const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
-    //             child: Text(
-    //                 index == 0 ? 'Current Employees' : 'Previous Employees',
-    //                 style: Theme.of(context).textTheme.titleLarge),
-    //           ),
-    //         ),
-    //       ],
-    //     );
-    //   },
-    // );
   }
 }

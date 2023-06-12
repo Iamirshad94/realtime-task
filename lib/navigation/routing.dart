@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:realtime_task/models/employee_model.dart';
 import 'package:realtime_task/screens/add_employee.dart';
 import 'package:realtime_task/screens/edit_employee.dart';
 import 'package:realtime_task/screens/home_page.dart';
@@ -8,11 +9,12 @@ class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
-        return MaterialPageRoute(builder: (_) => HomePage());
+        return MaterialPageRoute(builder: (_) => const HomePage());
       case '/add-employee':
         return MaterialPageRoute(builder: (_) => AddEmployeeScreen());
       case '/edit-employee':
-        return MaterialPageRoute(builder: (_) => EditEmployeeDetails());
+        final Employee employee = settings.arguments as Employee;
+        return MaterialPageRoute(builder: (_) => EditEmployeeDetails(employee: employee,));
       default:
         return MaterialPageRoute(
             builder: (_) => Scaffold(

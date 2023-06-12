@@ -17,3 +17,10 @@ class ErrorEmployeeState extends EmployeeState {
 
   ErrorEmployeeState(this.errorMessage);
 }
+
+class EmployeeFromState<T> extends EmployeeState {
+  DateTime? selectedDate;
+  T? employeeRole;
+
+  EmployeeFromState({this.selectedDate,this.employeeRole});
+}

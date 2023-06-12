@@ -17,7 +17,15 @@ class UpdateEmployee extends EmployeeEvent {
 }
 
 class DeleteEmployee extends EmployeeEvent {
-  final String id;
+  final int id;
 
   DeleteEmployee(this.id);
+}
+
+class EmployeeFormUpdate<T> extends EmployeeEvent {
+  DateTime? selectedDate;
+  T? employeeRole;
+
+
+  EmployeeFormUpdate({this.selectedDate, this.employeeRole});
 }
