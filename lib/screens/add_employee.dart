@@ -15,6 +15,7 @@ import '../models/employee_model.dart';
 import '../utility/custom_button.dart';
 import '../utility/custom_datepicker.dart';
 import '../utility/custom_textfield.dart';
+import '../utility/route_constants.dart';
 
 class AddEmployeeScreen extends StatefulWidget {
   @override
@@ -27,40 +28,98 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
   String? dropDownValue;
   EmployeeRepository? repository;
   String? _selectedDate;
+  String? _selectedDateTo;
   DateTime? _focusedDay;
   late EmployeeBloc _employeeBloc;
-
 
   @override
   void initState() {
     super.initState();
     _employeeBloc = BlocProvider.of<EmployeeBloc>(context);
-    _employeeBloc.add(EmployeeFormUpdate(selectedDate: DateTime.now()));
-  }
-
-  void _selectToday() {
     _employeeBloc.add(EmployeeFormUpdate(
-        employeeRole: _roleController.text, selectedDate: DateTime.now()));
+        employeeRole: AppConstants.menuItems[0],
+        selectedDate: DateTime.now(),
+        selectedDateTo: DateTime.now()));
   }
 
-  void _selectNextMonday() {
-    _employeeBloc.add(EmployeeFormUpdate(
-        employeeRole: _roleController.text,
-        selectedDate: _getNextWeekday(DateTime.monday)));
+
+  // function for selecting today's date
+  void _selectToday(bool isStartDate) {
+    if (!isStartDate) {
+      _employeeBloc.add(EmployeeFormUpdate(
+          employeeRole: _roleController.text.isEmpty
+              ? AppConstants.menuItems[0]
+              : _roleController.text,
+          selectedDate: DateTime.parse(_selectedDate!),
+          selectedDateTo: DateTime.now()));
+    } else {
+      _employeeBloc.add(EmployeeFormUpdate(
+          employeeRole: _roleController.text.isEmpty
+              ? AppConstants.menuItems[0]
+              : _roleController.text,
+          selectedDateTo: DateTime.parse(_selectedDateTo!),
+          selectedDate: DateTime.now()));
+    }
   }
 
-  void _selectNextTuesday() {
-    _employeeBloc.add(EmployeeFormUpdate(
-        employeeRole: _roleController.text,
-        selectedDate: _getNextWeekday(DateTime.tuesday)));
+  // function for selecting next monday from today's date
+  void _selectNextMonday(bool isStartDate) {
+    if (!isStartDate) {
+      _employeeBloc.add(EmployeeFormUpdate(
+          employeeRole: _roleController.text.isEmpty
+              ? AppConstants.menuItems[0]
+              : _roleController.text,
+          selectedDate: DateTime.parse(_selectedDate!),
+          selectedDateTo: _getNextWeekday(DateTime.monday)));
+    } else {
+      _employeeBloc.add(EmployeeFormUpdate(
+          employeeRole: _roleController.text.isEmpty
+              ? AppConstants.menuItems[0]
+              : _roleController.text,
+          selectedDateTo: DateTime.parse(_selectedDateTo!),
+          selectedDate: _getNextWeekday(DateTime.monday)));
+    }
   }
 
-  void _selectNextWeek() {
-    _employeeBloc.add(EmployeeFormUpdate(
-        employeeRole: _roleController.text,
-        selectedDate: DateTime.now().add(const Duration(days: 7))));
+  // function for selecting next tuesday from today's date
+  void _selectNextTuesday(bool isStartDate) {
+    if (!isStartDate) {
+      _employeeBloc.add(EmployeeFormUpdate(
+          employeeRole: _roleController.text.isEmpty
+              ? AppConstants.menuItems[0]
+              : _roleController.text,
+          selectedDate: DateTime.parse(_selectedDate!),
+          selectedDateTo: _getNextWeekday(DateTime.tuesday)));
+    } else {
+      _employeeBloc.add(EmployeeFormUpdate(
+          employeeRole: _roleController.text.isEmpty
+              ? AppConstants.menuItems[0]
+              : _roleController.text,
+          selectedDateTo: DateTime.parse(_selectedDateTo!),
+          selectedDate: _getNextWeekday(DateTime.tuesday)));
+    }
   }
 
+  // function for selecting next week date from today's date
+  void _selectNextWeek(bool isStartDate) {
+    if (!isStartDate) {
+      _employeeBloc.add(EmployeeFormUpdate(
+          employeeRole: _roleController.text.isEmpty
+              ? AppConstants.menuItems[0]
+              : _roleController.text,
+          selectedDate: DateTime.parse(_selectedDate!),
+          selectedDateTo: DateTime.now().add(const Duration(days: 7))));
+    } else {
+      _employeeBloc.add(EmployeeFormUpdate(
+          employeeRole: _roleController.text.isEmpty
+              ? AppConstants.menuItems[0]
+              : _roleController.text,
+          selectedDateTo: DateTime.parse(_selectedDateTo!),
+          selectedDate: DateTime.now().add(const Duration(days: 7))));
+    }
+  }
+
+  // function for adding 7 days into current day
   DateTime _getNextWeekday(int weekday) {
     final now = DateTime.now();
     if (weekday == now.weekday) {
@@ -72,9 +131,14 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
     }
   }
 
-  String formatDate(DateTime dateTime) {
-    return DateFormat.yMMMMd()
-        .format(dateTime); // will give output as March 1, 2023
+
+  // this function is use to format date into this March 1, 2023 formate
+  String formatDate(DateTime? dateTime) {
+    if (dateTime != null) {
+      return DateFormat.yMMMMd().format(dateTime);
+    }
+    return 'No Date';
+    // will give output as March 1, 2023
   }
 
   @override
@@ -86,172 +150,278 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
           child: CircularProgressIndicator(),
         );
       } else {
-        _selectedDate = formatDate(state.selectedDate ?? DateTime.now());
-        return SafeArea(
-          child: Scaffold(
-            appBar: const CustomAppBar(title: AppConstants.addEmployee),
-            body: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // employee name text field
-                      SizedBox(
-                        height: screenSize.height * 0.1,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 18.0),
-                          child: CustomTextField(
-                            labelText: 'Employee Name',
-                            prefixIcon: Icons.person,
-                            textEditingController: _nameController,
-                          ),
-                        ),
-                      ),
-
-                      // select role dropdown widget
-                      SizedBox(
-                          height: screenSize.height * 0.055,
-                          child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: .0),
-                              child: CustomDropdown(
-                                items: AppConstants.menuItems,
-                                selectedValue: dropDownValue,
-                                onChanged: (String? value) {
-                                  _roleController.text = value ?? '';
-                                },
-                              ))),
-
-                      // select date & time widgets in row
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 18.0),
-                        child: GestureDetector(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return StatefulBuilder(
-                                  builder: (BuildContext context, setState) {
-                                    return Center(
-                                        // Aligns the container to center
-                                        child: Container(
-                                      // A simplified version of dialog.
-                                      width: screenSize.width * 0.9,
-                                      height: screenSize.height / 1.5,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(12)),
-                                      child: Material(
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              shortCutButtons(),
-                                              calendar(),
-                                              const Divider(
-                                                thickness: 1.0,
-                                                color: Colors.grey,
-                                              ),
-                                              datePickerFooter(),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ));
-                                  },
-                                );
-                              },
-                            );
-                          },
-                          child: SizedBox(
-                              height: screenSize.height * 0.055,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.black38),
-                                    borderRadius: BorderRadius.circular(2)),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 14.0),
-                                      child: SvgPicture.asset(
-                                          AppConstants.calendarImage),
-                                    ),
-                                    Text(_selectedDate!,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium)
-                                  ],
-                                ),
-                              )),
-                        ),
-                      )
-                    ])),
-            bottomSheet: SizedBox(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    CustomAppButton(
-                      onPressed: () {},
-                      text: AppConstants.btnCancel,
-                      color: Colors.lightBlueAccent.withOpacity(0.1),
-                      textColor: Colors.blue,
-                      fontSize: 16.0,
-                      borderRadius: 4.0,
-                      padding: 20.0,
-                    ),
-                    const SizedBox(
-                      width: 12,
-                    ),
-                    CustomAppButton(
+        // adding initial date and profession values
+        _roleController.text=state.employeeRole;
+        _selectedDate = state.selectedDate == null
+            ? 'No Date'
+            : state.selectedDate.toString();
+        _selectedDateTo = state.selectedDateTo == null
+            ? 'No Date'
+            : state.selectedDateTo.toString();
+        debugPrint('selected Date ${_selectedDate}');
+        debugPrint('selected Date to ${state.selectedDateTo}');
+        return WillPopScope(
+            onWillPop: () async {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  RouteConstants.homeRoute, (Route<dynamic> route) => false);
+              return false;
+            },
+            child: SafeArea(
+              child: Scaffold(
+                appBar: CustomAppBar(
+                  title: AppConstants.addEmployee,
+                  leading: IconButton(
                       onPressed: () {
-                        final employee = Employee(
-                          name: _nameController.text,
-                          profession: _roleController.text,
-                          dateTime: _selectedDate.toString(),
-                        );
-                        if (employee.name.isEmpty ||
-                            employee.profession.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              backgroundColor: Colors.red,
-                              content: Text(
-                                  AppConstants.formValidationMsg),
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        } else {
-                          BlocProvider.of<EmployeeBloc>(context)
-                              .add(AddEmployee(employee));
-                        }
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            RouteConstants.homeRoute,
+                            (Route<dynamic> route) => false);
                       },
-                      text: AppConstants.btnSave,
-                      color: Colors.blue,
-                      textColor: Colors.white,
-                      fontSize: 16.0,
-                      borderRadius: 4.0,
-                      padding: 20.0,
+                      icon: const Icon(Icons.arrow_back_rounded)),
+                ),
+                body: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 12),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // employee name text field
+                          SizedBox(
+                            height: screenSize.height * 0.1,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 18.0),
+                              child: CustomTextField(
+                                labelText: 'Employee Name',
+                                prefixIcon: Icons.person,
+                                textEditingController: _nameController,
+                              ),
+                            ),
+                          ),
+
+                          // select role dropdown widget
+                          SizedBox(
+                              height: screenSize.height * 0.055,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: .0),
+                                  child: CustomDropdown(
+                                    items: AppConstants.menuItems,
+                                    selectedValue: dropDownValue,
+                                    onChanged: (String? value) {
+                                      _employeeBloc.add(EmployeeFormUpdate(
+                                          employeeRole: value,
+                                          selectedDateTo:
+                                              DateTime.parse(_selectedDateTo!),
+                                          selectedDate:
+                                              DateTime.parse(_selectedDate!)));
+
+                                      _roleController.text = value ?? '';
+                                    },
+                                  ))),
+
+                          // this widget is rendering both start and End calendar button
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 18.0),
+                            child: GestureDetector(
+                                onTap: () {},
+                                child:
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () => showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return calendar(screenSize, true);
+                                        },
+                                      ),
+                                      child: SizedBox(
+                                          height: screenSize.height * 0.055,
+                                          width: screenSize.width / 2.5,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.black38),
+                                                borderRadius:
+                                                    BorderRadius.circular(2)),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets
+                                                          .symmetric(
+                                                      horizontal: 14.0),
+                                                  child: SvgPicture.asset(
+                                                      AppConstants
+                                                          .calendarImage),
+                                                ),
+                                                _selectedDate == 'No Date'
+                                                    ? Expanded(
+                                                        child: Text(
+                                                            _selectedDate!,
+                                                            style: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .titleMedium),
+                                                      )
+                                                    : Expanded(
+                                                        child: Text(
+                                                            formatDate(
+                                                                DateTime.parse(
+                                                                    _selectedDate!)),
+                                                            style: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .titleMedium),
+                                                      )
+                                              ],
+                                            ),
+                                          )),
+                                    ),
+                                    SizedBox(
+                                      child: SvgPicture.asset(
+                                          'assets/images/Vector.svg'),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return calendar(screenSize, false);
+                                        },
+                                      ),
+                                      child: SizedBox(
+                                          height: screenSize.height * 0.055,
+                                          width: screenSize.width / 2.5,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.black38),
+                                                borderRadius:
+                                                    BorderRadius.circular(2)),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets
+                                                          .symmetric(
+                                                      horizontal: 14.0),
+                                                  child: SvgPicture.asset(
+                                                      AppConstants
+                                                          .calendarImage),
+                                                ),
+                                                _selectedDateTo == 'No Date'
+                                                    ? Expanded(
+                                                        child: Text(
+                                                            _selectedDateTo!,
+                                                            style: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .titleMedium),
+                                                      )
+                                                    : Expanded(
+                                                        child: Text(
+                                                            formatDate(
+                                                                DateTime.parse(
+                                                                    _selectedDateTo!)),
+                                                            style: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .titleMedium),
+                                                      )
+                                              ],
+                                            ),
+                                          )),
+                                    ),
+                                  ],
+                                )),
+                          )
+                        ])),
+
+                // this bottom sheet is use to show save and cancel button
+                bottomSheet: SizedBox(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        CustomAppButton(
+                          onPressed: () {},
+                          text: AppConstants.btnCancel,
+                          color: Colors.lightBlueAccent.withOpacity(0.1),
+                          textColor: Colors.blue,
+                          fontSize: 16.0,
+                          borderRadius: 4.0,
+                          padding: 20.0,
+                        ),
+                        const SizedBox(
+                          width: 12,
+                        ),
+                        CustomAppButton(
+                          onPressed: () {
+                            final employee = Employee(
+                              name: _nameController.text,
+                              profession: _roleController.text,
+                              fromDate: _selectedDate.toString(),
+                              endDate: _selectedDateTo.toString(),
+                            );
+                            int compareDate = DateTime.parse(employee.fromDate).compareTo(DateTime.parse(employee.endDate));
+                             if(compareDate > 0) {
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                 const SnackBar(
+                                   backgroundColor: Colors.red,
+                                   content: Text(AppConstants.endDateCannotLess),
+                                   duration: Duration(seconds: 2),
+                                 ),
+                               );
+                             }
+                             else if(DateUtils.isSameDay(DateTime.parse(employee.fromDate), DateTime.parse(employee.endDate))){
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                 const SnackBar(
+                                   backgroundColor: Colors.red,
+                                   content: Text(AppConstants.bothDatesCannotSame),
+                                   duration: Duration(seconds: 2),
+                                 ),
+                               );
+                             }
+                           else if (employee.name.isEmpty ||
+                                employee.profession.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  backgroundColor: Colors.red,
+                                  content: Text(AppConstants.formValidationMsg),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                           else{
+                             _employeeBloc.add(AddEmployee(employee));
+                             }
+                          },
+                          text: AppConstants.btnSave,
+                          color: Colors.blue,
+                          textColor: Colors.white,
+                          fontSize: 16.0,
+                          borderRadius: 4.0,
+                          padding: 20.0,
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        );
+            ));
       }
     });
   }
 
-  Widget shortCutButtons() {
+
+  // calendar top 4 shortcuts buttons
+  Widget shortCutButtons(bool isStartDate) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -266,7 +436,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                     borderRadius: BorderRadius.circular(4)),
                 child: CustomAppButton(
                   onPressed: () {
-                    _selectToday();
+                    _selectToday(isStartDate);
                     Navigator.pop(context);
                   },
                   text: AppConstants.calendarBtnToday,
@@ -287,7 +457,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                   borderRadius: BorderRadius.circular(4)),
               child: CustomAppButton(
                 onPressed: () {
-                  _selectNextTuesday();
+                  _selectNextTuesday(isStartDate);
                   Navigator.pop(context);
                 },
                 text: AppConstants.calendarBtnTuesday,
@@ -312,7 +482,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                     borderRadius: BorderRadius.circular(4)),
                 child: CustomAppButton(
                   onPressed: () {
-                    _selectNextMonday();
+                    _selectNextMonday(isStartDate);
                     Navigator.pop(context);
                   },
                   text: AppConstants.calendarBtnMonday,
@@ -333,7 +503,7 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                     borderRadius: BorderRadius.circular(4)),
                 child: CustomAppButton(
                   onPressed: () {
-                    _selectNextWeek();
+                    _selectNextWeek(isStartDate);
                     Navigator.pop(context);
                   },
                   text: AppConstants.calendarBtnWeek,
@@ -349,14 +519,46 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
     );
   }
 
-  Widget calendar() {
-    return CustomDatePicker(onDateSelected: (date) {
-      debugPrint('callback date----- $date');
-      _focusedDay = date;
-    });
+  // this widget is rendering calendar below shortcuts button
+  Widget calendar(Size screenSize, bool isStartDate) {
+    return StatefulBuilder(
+      builder: (BuildContext context, setState) {
+        return Center(
+            // Aligns the container to center
+            child: Container(
+          // A simplified version of dialog.
+          width: screenSize.width * 0.9,
+          height: screenSize.height / 1.5,
+          decoration: BoxDecoration(
+              color: Colors.white, borderRadius: BorderRadius.circular(12)),
+          child: Material(
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  shortCutButtons(isStartDate),
+                  CustomDatePicker(onDateSelected: (date) {
+                    debugPrint('callback date----- $date');
+                    _focusedDay = date;
+                  }),
+                  const Divider(
+                    thickness: 1.0,
+                    color: Colors.grey,
+                  ),
+                  datePickerFooter(isStartDate),
+                ],
+              ),
+            ),
+          ),
+        ));
+      },
+    );
   }
 
-  Widget datePickerFooter() {
+  // this function is use to show cancel and save button on calendar dialogue
+  Widget datePickerFooter(isStartDate) {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Row(
@@ -384,9 +586,25 @@ class _AddEmployeeScreenState extends State<AddEmployeeScreen> {
                 CustomAppButton(
                   onPressed: () {
                     debugPrint('_roleController---- ${_roleController.text}');
-                    _employeeBloc.add(EmployeeFormUpdate(
-                        employeeRole: _roleController.text,
-                        selectedDate: _focusedDay));
+                    if (!isStartDate) {
+                      _employeeBloc.add(EmployeeFormUpdate(
+                        employeeRole: _roleController.text.isEmpty
+                            ? AppConstants.menuItems[0]
+                            : _roleController.text,
+                        selectedDate: DateTime.parse(_selectedDate!),
+                        selectedDateTo: _focusedDay,
+                      ));
+                    }
+
+                    else {
+                      _employeeBloc.add(EmployeeFormUpdate(
+                        employeeRole: _roleController.text.isEmpty
+                            ? AppConstants.menuItems[0]
+                            : _roleController.text,
+                        selectedDate: _focusedDay,
+                        selectedDateTo: DateTime.parse(_selectedDateTo!),
+                      ));
+                    }
                     Navigator.pop(context);
                   },
                   text: AppConstants.btnSave,

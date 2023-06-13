@@ -1,25 +1,16 @@
-// Models
-class EmployeeGroup {
-  final String groupName;
-  final List<Employee> employees;
-
-  EmployeeGroup({
-    required this.groupName,
-    required this.employees,
-  });
-}
-
 class Employee {
   final int? id;
   final String name;
   final String profession;
-  final String dateTime;
+  final String fromDate;
+  final String endDate;
 
   Employee({
      this.id,
     required this.name,
     required this.profession,
-    required this.dateTime,
+    required this.fromDate,
+    required this.endDate,
   });
 
    Map<String,dynamic> toMap(){ // used when inserting data to the database
@@ -27,7 +18,8 @@ class Employee {
        "id" : id,
        "name" : name,
        "profession" : profession,
-       "dateTime":dateTime
+       "fromDate":fromDate,
+       'endDate':endDate,
      };
    }
 }

@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:table_calendar/table_calendar.dart';
-
 import '../bloc/employee_bloc.dart';
-import '../bloc/employee_bloc_event.dart';
 
 class CustomDatePicker extends StatefulWidget {
   final Function(DateTime)? onDateSelected;

@@ -60,7 +60,7 @@ class EmployeeBloc extends Bloc<EmployeeEvent, EmployeeState> {
     on<EmployeeFormUpdate>((event, emit) async {
       debugPrint('date parsing ${event.selectedDate}');
       try{
-        emit(EmployeeFromState(selectedDate: event.selectedDate,employeeRole: event.employeeRole));
+        emit(EmployeeFromState(selectedDate: event.selectedDate,selectedDateTo: event.selectedDateTo,employeeRole: event.employeeRole));
       }
       catch(e){
         debugPrint('$e');

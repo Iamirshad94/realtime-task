@@ -20,7 +20,9 @@ class ErrorEmployeeState extends EmployeeState {
 
 class EmployeeFromState<T> extends EmployeeState {
   DateTime? selectedDate;
+  DateTime? selectedDateTo;
   T? employeeRole;
 
-  EmployeeFromState({this.selectedDate,this.employeeRole});
+  EmployeeFromState({this.selectedDate,this.selectedDateTo,this.employeeRole});
 }
+

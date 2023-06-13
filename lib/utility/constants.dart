@@ -13,6 +13,11 @@ class AppConstants{
    static const String swipeLeft='Swipe left or right to delete an item';
    static const String dataDeleteMsg='Employee data has been deleted!';
    static const String formValidationMsg='Please fill all the details to proceed!';
+   static const String bothDatesCannotSame='Start and End Date cannot be Same!';
+   static const String endDateCannotLess='End Date Has to be greater then Start Date!';
+   static const String bothDates='both Dates Cannot be before the same!';
+
+   // this is a static list which we are using in profession dropdown
    static const List<String> menuItems = [
       'Software Developer',
       'Product Manager',
@@ -26,10 +31,10 @@ class AppConstants{
 
 
    //this var is holding all images values
-
    static const String emptyStateImage='assets/images/empty.svg';
    static const String personImage='assets/images/person.svg';
    static const String calendarImage='assets/images/calendar.svg';
    static const String roleImage='assets/images/role.svg';
 
 }
+

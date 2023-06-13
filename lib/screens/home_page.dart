@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 import 'package:realtime_task/bloc/employee_bloc.dart';
 import 'package:realtime_task/bloc/employee_bloc_event.dart';
 import 'package:realtime_task/models/employee_model.dart';
@@ -27,6 +28,8 @@ class _HomePageState extends State<HomePage> {
     _employeeBloc = BlocProvider.of<EmployeeBloc>(context);
     _employeeBloc.add(LoadEmployees());
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +117,14 @@ class _EmployeeListState extends State<EmployeeList> {
     _employeeBloc = BlocProvider.of(context);
   }
 
+  String formatDate(DateTime? dateTime) {
+    if (dateTime != null) {
+      return DateFormat.yMMMMd().format(dateTime);
+    }
+    return 'No Date';
+    // will give output as March 1, 2023
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -152,7 +163,10 @@ class _EmployeeListState extends State<EmployeeList> {
                       id: employee.id,
                       name: employee.name,
                       profession: employee.profession,
-                      dateTime: employee.dateTime));
+                      fromDate: employee.fromDate,
+                       endDate: employee.endDate
+
+                  ));
             },
             child: SizedBox(
               width: double.infinity,
@@ -179,7 +193,9 @@ class _EmployeeListState extends State<EmployeeList> {
                       height: 4,
                     ),
                     Text(
-                      widget.employeeList?[childIndex].dateTime ?? '',
+                      formatDate(DateTime.parse(widget.employeeList![childIndex].fromDate))
+
+                      ,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ],

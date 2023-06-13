@@ -25,7 +25,7 @@ class EmployeeRepository {
       version: 1,
       onCreate: (db, version) {
         return db.execute(
-          'CREATE TABLE employees(id INTEGER PRIMARY KEY, name TEXT, profession TEXT, dateTime TEXT)',
+          'CREATE TABLE employees(id INTEGER PRIMARY KEY, name TEXT, profession TEXT, fromDate TEXT, endDate TEXT)',
         );
       },
     );
@@ -44,7 +44,8 @@ class EmployeeRepository {
         id: employeeMap['id'],
         name: employeeMap['name'],
         profession: employeeMap['profession'],
-        dateTime: employeeMap['dateTime'],
+        fromDate: employeeMap['fromDate'],
+        endDate: employeeMap['endDate'],
       );
     }).toList();
   }
@@ -68,6 +69,6 @@ class EmployeeRepository {
   }
 
   Future<void> closeDatabase() async {
-    await _database.close();
+   await _database.close();
   }
 }
